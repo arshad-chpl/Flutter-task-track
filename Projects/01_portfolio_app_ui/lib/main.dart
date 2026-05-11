@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -26,18 +27,15 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text('data')),
       body: SafeArea(
         child: Center(
           child: Container(
-            width: 370,
             margin: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-              color: Colors.black,
-              width: 1,
-              ),
+              border: Border.all(color: Colors.black, width: 1),
             ),
 
             child: Column(
@@ -72,17 +70,15 @@ class ProfilePage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-
-
                           // Profile Image
                           ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: Image.network(
-                           "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-                            height: 300,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                              ),
+                              "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
+                              height: 300,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
                           ),
 
                           // Name
@@ -99,10 +95,7 @@ class ProfilePage extends StatelessWidget {
 
                           const Text(
                             "Computer Science Student | Karnavati University",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 15,
-                            ),
+                            style: TextStyle(color: Colors.grey, fontSize: 15),
                           ),
 
                           const SizedBox(height: 28),
@@ -125,14 +118,10 @@ class ProfilePage extends StatelessWidget {
 
                           const SizedBox(height: 14),
 
-                          aboutTile(
-                              "Passionate about technology & innovation"),
-                          aboutTile(
-                              "Loves creating clean UI/UX designs"),
-                          aboutTile(
-                              "Building robotics & AI projects"),
-                          aboutTile(
-                              "Exploring startup ideas and side hustles"),
+                          aboutTile("Passionate about technology & innovation"),
+                          aboutTile("Loves creating clean UI/UX designs"),
+                          aboutTile("Building robotics & AI projects"),
+                          aboutTile("Exploring startup ideas and side hustles"),
 
                           const SizedBox(height: 30),
                         ],
@@ -157,10 +146,7 @@ class ProfilePage extends StatelessWidget {
             width: 110,
             child: Text(
               title,
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 16,
-              ),
+              style: const TextStyle(color: Colors.grey, fontSize: 16),
             ),
           ),
           Expanded(
@@ -183,16 +169,8 @@ class ProfilePage extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: Text(
         "• $text",
-        style: const TextStyle(
-          fontSize: 15,
-          color: Color(0xFF1A1A40),
-        ),
+        style: const TextStyle(fontSize: 15, color: Color(0xFF1A1A40)),
       ),
     );
   }
 }
-
-
-
-
-
