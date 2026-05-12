@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -11,10 +10,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Bansi Profile',
+      title: 'Profile',
       theme: ThemeData(
         scaffoldBackgroundColor: const Color(0xFFF4F4F4),
-        fontFamily: 'Poppins',
       ),
       home: const ProfilePage(),
     );
@@ -24,107 +22,176 @@ class MyApp extends StatelessWidget {
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
+  Future<void> openUrl(String link) async {
+    await launchUrl(
+      Uri.parse(link),
+      mode: LaunchMode.externalApplication,
+    );
+  }
+
+  Future<void> openEmail() async {
+    await launchUrl(
+      Uri(
+        scheme: 'mailto',
+        path: 'bansi@example.com',
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: Container(
+            width: 420,
             margin: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.black, width: 1),
+              border: Border.all(),
             ),
-
             child: Column(
               children: [
-                // Top Bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 18,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text(
-                        "My Profile",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1A1A40),
-                        ),
-                      ),
-                    ],
+
+                // TITLE
+                const Padding(
+                  padding: EdgeInsets.all(18),
+                  child: Text(
+                    "My Profile",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1A1A40),
+                    ),
                   ),
                 ),
 
-                const Divider(height: 1),
+                const Divider(),
 
                 Expanded(
                   child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Profile Image
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Image.network(
-                              "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-                              height: 300,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+
+                        // STACK
+                        Stack(
+                          clipBehavior: Clip.none,
+                          alignment: Alignment.center,
+                          children: [
+
+                            Container(
+                              height: 220,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                image: const DecorationImage(
+                                  fit: BoxFit.cover,
+                                  image: NetworkImage(
+                                    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
 
-                          // Name
-                          const Text(
-                            "Bansi Sanepara",
-                            style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1A1A40),
+                            const Positioned(
+                              bottom: -60,
+                              child: CircleAvatar(
+                                radius: 70,
+                                backgroundColor: Colors.white,
+                                child: CircleAvatar(
+                                  radius: 65,
+                                  backgroundImage: NetworkImage(
+                                    "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
+                                  ),
+                                ),
+                              ),
                             ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 80),
+
+                        // NAME
+                        const Text(
+                          "Bansi Sanepara",
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1A1A40),
                           ),
+                        ),
 
-                          const SizedBox(height: 5),
+                        const SizedBox(height: 5),
 
-                          const Text(
-                            "Computer Science Student | Karnavati University",
-                            style: TextStyle(color: Colors.grey, fontSize: 15),
-                          ),
+                        const Text(
+                          "Computer Science Student",
+                          style: TextStyle(color: Colors.grey),
+                        ),
 
-                          const SizedBox(height: 28),
+                        const SizedBox(height: 25),
 
-                          profileInfo("Gender:", "Female"),
-                          profileInfo("Age:", "21 Years"),
-                          profileInfo("Education:", "Computer Science"),
-                          profileInfo("Hobbies:", "Reading & Playing Guitar"),
+                        // SOCIAL BUTTONS
+                        Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.spaceEvenly,
+                          children: [
 
-                          const SizedBox(height: 24),
+                            iconBtn(
+                              Icons.work,
+                              Colors.blue,
+                              () => openUrl("https://linkedin.com"),
+                            ),
 
-                          const Text(
+                            iconBtn(
+                              Icons.camera_alt,
+                              Colors.purple,
+                              () => openUrl("https://instagram.com"),
+                            ),
+
+                            iconBtn(
+                              Icons.flutter_dash,
+                              Colors.black,
+                              () => openUrl("https://twitter.com"),
+                            ),
+
+                            iconBtn(
+                              Icons.email,
+                              Colors.red,
+                              openEmail,
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        info("Gender", "Female"),
+                        info("Age", "21 Years"),
+                        info("Education", "Computer Science"),
+                        info("Hobbies", "Reading & Guitar"),
+
+                        const SizedBox(height: 25),
+
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
                             "About Me",
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF1A1A40),
                             ),
                           ),
+                        ),
 
-                          const SizedBox(height: 14),
+                        const SizedBox(height: 10),
 
-                          aboutTile("Passionate about technology & innovation"),
-                          aboutTile("Loves creating clean UI/UX designs"),
-                          aboutTile("Building robotics & AI projects"),
-                          aboutTile("Exploring startup ideas and side hustles"),
+                        about("Passionate about technology"),
+                        about("Loves UI/UX design"),
+                        about("Building projects"),
+                        about("Exploring startups"),
 
-                          const SizedBox(height: 30),
-                        ],
-                      ),
+                        const SizedBox(height: 20),
+                      ],
                     ),
                   ),
                 ),
@@ -136,40 +203,52 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget profileInfo(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 110,
-            child: Text(
-              title,
-              style: const TextStyle(color: Colors.grey, fontSize: 16),
-            ),
+  // INFO
+  Widget info(String t, String v) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Row(
+      children: [
+        SizedBox(
+          width: 110,
+          child: Text(
+            "$t :",
+            style: const TextStyle(color: Colors.grey),
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF1A1A40),
-              ),
-            ),
+        ),
+        Text(
+          v,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
 
-  Widget aboutTile(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Text(
-        "• $text",
-        style: const TextStyle(fontSize: 15, color: Color(0xFF1A1A40)),
-      ),
+  // ABOUT
+  Widget about(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Align(
+      alignment: Alignment.centerLeft,
+      child: Text("• $text"),
+    ),
+  );
+
+  // SOCIAL BUTTON
+  Widget iconBtn(
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    ElevatedButton(
+  onPressed: onTap,
+  style: ElevatedButton.styleFrom(
+    shape: const CircleBorder(),
+    padding: const EdgeInsets.all(16),
+    backgroundColor: color.withOpacity(0.12),
+    elevation: 0,
+  ),
+  child: Icon(icon, color: color),
     );
   }
 }
