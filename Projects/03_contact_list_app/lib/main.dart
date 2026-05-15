@@ -114,7 +114,8 @@ class _ContactListScreenState
 "bio": "Creating responsive UIs",
 "phone": "+91 9876543210",
 "email": "priya@example.com",
-"image": "https://i.pravatar.cc/150?img=10"
+"image": "https://i.pravatar.cc/150?img=10",
+"time": "8:00 AM"
 },
 {
 "name": "Yash Malhotra",
@@ -122,7 +123,9 @@ class _ContactListScreenState
 "bio": "Exploring Dart deeply",
 "phone": "+91 9876543211",
 "email": "yash@example.com",
-"image": "https://i.pravatar.cc/150?img=11"
+"image": "https://i.pravatar.cc/150?img=11",
+"time": "Yesterday"
+
 },
 {
 "name": "Ishita Roy",
@@ -130,7 +133,8 @@ class _ContactListScreenState
 "bio": "Love creating minimal UI",
 "phone": "+91 9876543212",
 "email": "ishita@example.com",
-"image": "https://i.pravatar.cc/150?img=12"
+"image": "https://i.pravatar.cc/150?img=12",
+"time": "Yesterday"
 },
 {
 "name": "Dev Patel",
@@ -138,7 +142,8 @@ class _ContactListScreenState
 "bio": "Future full-stack developer",
 "phone": "+91 9876543213",
 "email": "dev@example.com",
-"image": "https://i.pravatar.cc/150?img=13"
+"image": "https://i.pravatar.cc/150?img=13",
+"time": "Yesterday"
 },
 {
 "name": "Neha Sharma",
@@ -146,7 +151,8 @@ class _ContactListScreenState
 "bio": "Tech enthusiast and learner",
 "phone": "+91 9876543214",
 "email": "neha@example.com",
-"image": "https://i.pravatar.cc/150?img=14"
+"image": "https://i.pravatar.cc/150?img=14",
+"time": "Yesterday"
 },
 {
 "name": "Kunal Jain",
@@ -154,7 +160,8 @@ class _ContactListScreenState
 "bio": "Working on Flutter animations",
 "phone": "+91 9876543215",
 "email": "kunal@example.com",
-"image": "https://i.pravatar.cc/150?img=15"
+"image": "https://i.pravatar.cc/150?img=15",
+"time": "Monday"
 },
 {
 "name": "Riya Sen",
@@ -162,7 +169,8 @@ class _ContactListScreenState
 "bio": "Loves dark themed apps",
 "phone": "+91 9876543216",
 "email": "riya@example.com",
-"image": "https://i.pravatar.cc/150?img=16"
+"image": "https://i.pravatar.cc/150?img=16",
+"time": "Monday"
 },
 {
 "name": "Aman Gupta",
@@ -170,7 +178,8 @@ class _ContactListScreenState
 "bio": "Practicing Flutter layouts",
 "phone": "+91 9876543217",
 "email": "aman@example.com",
-"image": "https://i.pravatar.cc/150?img=17"
+"image": "https://i.pravatar.cc/150?img=17",
+"time": "Sunday"
 },
 {
 "name": "Simran Kaur",
@@ -178,7 +187,8 @@ class _ContactListScreenState
 "bio": "Building apps with creativity",
 "phone": "+91 9876543218",
 "email": "simran@example.com",
-"image": "https://i.pravatar.cc/150?img=18"
+"image": "https://i.pravatar.cc/150?img=18",
+"time": "Saturday"
 },
 {
 "name": "Harsh Vardhan",
@@ -186,7 +196,8 @@ class _ContactListScreenState
 "bio": "Flutter beginner with big goals",
 "phone": "+91 9876543219",
 "email": "harsh@example.com",
-"image": "https://i.pravatar.cc/150?img=19"
+"image": "https://i.pravatar.cc/150?img=19",
+"time": "Saturday"
 },
 {
 "name": "Nisha Iyer",
@@ -194,7 +205,8 @@ class _ContactListScreenState
 "bio": "Exploring app architectures",
 "phone": "+91 9876543220",
 "email": "nisha@example.com",
-"image": "https://i.pravatar.cc/150?img=20"
+"image": "https://i.pravatar.cc/150?img=20",
+"time": "Friday"
 }
 ];
 
@@ -226,9 +238,9 @@ Widget build(BuildContext context) {
 
          
           leading: CircleAvatar(
-  radius: 28,
-  backgroundImage: NetworkImage(person["image"]),
-),
+            radius: 28,
+            backgroundImage: NetworkImage(person["image"]),
+          ),
           
           title: Text(
             person["name"],
@@ -244,28 +256,29 @@ Widget build(BuildContext context) {
           ),
           
           trailing: Row(
-  mainAxisSize: MainAxisSize.min,
-  children: [
-    Text(
-      "10:30 AM", // you can change or make dynamic later
-      style: const TextStyle(
-        fontSize: 14,
-        color: Colors.grey,
-      ),
-    ),
-    const SizedBox(width: 8),
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                person["time"], // you can change or make dynamic later
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
 
-    Icon(
-      Icons.call,
-      size: 22,
-      color: person["status"] == "Online"
-          ? Colors.green
-          : person["status"] == "Busy"
-              ? Colors.red
-              : Colors.grey,
-    ),
-  ],
-),
+            const SizedBox(width: 8),
+
+            Icon(
+              Icons.call,
+              size: 22,
+              color: person["status"] == "Online"
+                        ? Colors.green
+                        : person["status"] == "Busy"
+                            ? Colors.red
+                            : Colors.grey,
+                ),
+              ],
+            ),
 
           onTap: () {
             Navigator.push(
@@ -282,7 +295,7 @@ Widget build(BuildContext context) {
   );
 }
     }
-// ---------------- DETAIL SCREEN ----------------
+//DETAIL SCREEN
 class ContactDetailScreen extends StatelessWidget {
   final Map<String, dynamic> contact;
  
@@ -378,5 +391,3 @@ class ContactDetailScreen extends StatelessWidget {
     );
   }
 }
-
-
