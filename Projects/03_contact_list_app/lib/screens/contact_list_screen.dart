@@ -15,8 +15,15 @@ class ContactListScreen extends StatefulWidget {
 
 class _ContactListScreenState
     extends State<ContactListScreen> {
+          String searchText = "";
+
   @override
   Widget build(BuildContext context) {
+    final filteredContacts = contacts.where((contact) {
+      return contact.name
+          .toLowerCase()
+          .contains(searchText.toLowerCase());
+    }).toList();
     return Scaffold(
       appBar: AppBar(
   centerTitle: true,
@@ -43,11 +50,44 @@ class _ContactListScreenState
   ],
 ),
 
-      body: ListView.builder(
-        itemCount: contacts.length,
+body: Column(
+        children: [
 
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+
+              decoration: InputDecoration(
+                hintText: "Search contact",
+
+                prefixIcon: const Icon(
+                  Icons.search,
+                ),
+
+                filled: true,
+                fillColor: Colors.grey.shade200,
+
+                border: OutlineInputBorder(
+                  borderRadius:
+                      BorderRadius.circular(15),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+
+              onChanged: (value) {
+                setState(() {
+                  searchText = value;
+                });
+              },
+            ),
+          ),
+
+
+     Expanded(
+            child: ListView.builder(
+        itemCount: filteredContacts.length,
         itemBuilder: (context, index) {
-          final person = contacts[index];
+            final person = filteredContacts[index];
 
           return ContactTile(
             contact: person,
@@ -65,12 +105,15 @@ class _ContactListScreenState
               if (updatedContact != null) {
                 setState(() {
                   contacts[index] = updatedContact;
-                });
-              }
-            },
-          );
-        },
+                  });
+                }
+              },
+            );
+          },
+        ),
       ),
-    );
-  }
+    ],
+  ),
+  );
+}
 }
