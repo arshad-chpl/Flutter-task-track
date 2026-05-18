@@ -69,11 +69,19 @@ class _CounterScreenState extends State<CounterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlueAccent,
+      backgroundColor: const Color.fromARGB(255, 139, 201, 249),
 
       appBar: AppBar(
-        title: const Text('Counter App'),
+        elevation: 0,
+        backgroundColor: const Color(0xFF5C6BC0),
         centerTitle: true,
+        title: const Text(
+          "Counter",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
       ),
 
       body: Center(
