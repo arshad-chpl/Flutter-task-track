@@ -7,3 +7,5 @@ class AppAssets {
   static const apple = "assets/icons/apple.png";
   static const phone = "assets/icons/phone1.png";
 }
+
+

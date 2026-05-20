@@ -53,7 +53,11 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
 
+
+
         child: Center(
+                              child: SingleChildScrollView(
+
           child: Container(
             margin: const EdgeInsets.all(20),
             padding: const EdgeInsets.all(20),
@@ -255,6 +259,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
