@@ -1,7 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class LoginScreen extends StatelessWidget {
+import '../constants/app_assets.dart';
+import '../constants/app_colors.dart';
+import '../widgets/auth_header.dart';
+import '../widgets/auth_text_field.dart';
+import '../widgets/primary_button.dart';
+import '../widgets/social_login_button.dart';
+
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  bool rememberMe = false;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> openUrl(String url) async {
+    final Uri uri = Uri.parse(url);
+
+    if (!await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    )) {
+      throw "Could not launch $url";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,148 +49,141 @@ class LoginScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFF1DBBA),
-              Color(0xFFFFFFFF),
-              Color(0xFFB49EF4),
-            ],
+            colors: AppColors.loginGradient,
           ),
         ),
 
-    child: Center(
-      child: Container(
-        margin: const EdgeInsets.all(20),
-        padding: const EdgeInsets.all(20),
+        child: Center(
+          child: Container(
+            margin: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
 
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.white,
-            width: 1.0,
-          ),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFF9EFE3),
-             // Color(0xFFFFFFFF),
-              Color(0xFFEFEBFD),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(20),
-          
-        ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white,
+                width: 1,
+              ),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFF9EFE3),
+                  Color(0xFFEFEBFD),
+                ],
+              ),
+            ),
 
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
- 
+            child: Form(
+              key: _formKey,
 
-                  Image.asset(
-                     "assets/icons/logo.png",
-                        height: 40,
-                        width: 40,
-                        fit: BoxFit.contain,
-                    ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
 
-                  const SizedBox(height: 10),
-
-                  const Text(
-                    "Login",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF111827),
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  const Text(
-                    "Enter your email and password to log in",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
+                  const AuthHeader(
+                    title: "Login",
+                    subtitle:
+                        "Enter your email and password to log in",
+                    imagePath: AppAssets.logo,
                   ),
 
                   const SizedBox(height: 30),
 
-                 
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: "Email",
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 18,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
+                  AuthTextField(
+                    controller: emailController,
+                    hint: "Email",
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Email is required";
+                      }
+                      if (!value.contains("@")) {
+                        return "Enter a valid email";
+                      }
+                      return null;
+                    },
                   ),
 
                   const SizedBox(height: 20),
 
-                  
-                  TextField(
+                  AuthTextField(
+                    controller: passwordController,
+                    hint: "Password",
                     obscureText: true,
-                    decoration: InputDecoration(
-                      hintText: "Password",
-                      filled: true,
-                      fillColor: Colors.white,
-                      suffixIcon: const Icon(Icons.visibility_off_outlined),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 18,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
+                    suffixIcon: Icons.visibility_off_outlined,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Password is required";
+                      }
+                      if (value.length < 6) {
+                        return "Password must be at least 6 characters";
+                      }
+                      return null;
+                    },
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
 
-                
-                  SizedBox(
-                    width: double.infinity,
-                    height: 55,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+
+                      Row(
+                        children: [
+
+                          Checkbox(
+                            value: rememberMe,
+                            activeColor: const Color(0xFF2563EB),
+                            onChanged: (value) {
+                              setState(() {
+                                rememberMe = value ?? false;
+                              });
+                            },
+                          ),
+
+                          const Text("Remember me"),
+                        ],
+                      ),
+
+                      GestureDetector(
+                        onTap: () {
+                          // Navigator.pushNamed(context, '/forgot-password');
+                        },
+                        child: const Text(
+                          "Forgot Password?",
+                          style: TextStyle(
+                            color: Color(0xFF2563EB),
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                      onPressed: () {},
-                      child: const Text(
-                        "Log In",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  PrimaryButton(
+                    text: "Log In",
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Login Successful"),
+                          ),
+                        );
+                      }
+                    },
                   ),
 
                   const SizedBox(height: 25),
 
-                 
                   Row(
                     children: const [
                       Expanded(child: Divider()),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Text(
-                          "Or login with",
-                          style: TextStyle(color: Colors.black),
-                        ),
+                        child: Text("Or login with"),
                       ),
                       Expanded(child: Divider()),
                     ],
@@ -160,25 +191,51 @@ class LoginScreen extends StatelessWidget {
 
                   const SizedBox(height: 25),
 
-                  
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
 
-                      socialButton("assets/icons/google.png"),
-                      socialButton("assets/icons/facebook.png"),
-                      socialButton("assets/icons/ios.png"),
-                      socialButton("assets/icons/phone.png"),
+                      SocialLoginButton(
+                        imagePath: AppAssets.google,
+                        onTap: () => openUrl(
+                          "https://accounts.google.com/",
+                        ),
+                      ),
+
+                      SocialLoginButton(
+                        imagePath: AppAssets.facebook,
+                        onTap: () => openUrl(
+                          "https://www.facebook.com/",
+                        ),
+                      ),
+
+                      SocialLoginButton(
+                        imagePath: AppAssets.apple,
+                        onTap: () => openUrl(
+                          "https://www.apple.com/",
+                        ),
+                      ),
+
+                      SocialLoginButton(
+                        imagePath: AppAssets.phone,
+                        onTap: () => openUrl(
+                          "https://www.google.com/",
+                        ),
+                      ),
                     ],
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 20),
 
-                  
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Don't have an account? "),
+
+                      const Text(
+                        "Don't have an account? ",
+                        style: TextStyle(color: Colors.black),
+                      ),
+
                       GestureDetector(
                         onTap: () {
                           Navigator.pushNamed(context, '/signup');
@@ -186,7 +243,7 @@ class LoginScreen extends StatelessWidget {
                         child: const Text(
                           "Sign Up",
                           style: TextStyle(
-                            color: Colors.blue,
+                            color: Color(0xFF2563EB),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -201,26 +258,4 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
-
-  
-  Widget socialButton(String path) {
-  return Container(
-   // width: 65, // increased box size
-    //height: 65,
-
-    decoration: BoxDecoration(
-     // color: Colors.white,
-      //borderRadius: BorderRadius.circular(12),
-    ),
-
-    child: Center(
-      child: Image.asset(
-        path,
-        width: 75,   // 👈 increase icon size here
-        height: 75,  // 👈 increase icon size here
-        fit: BoxFit.contain,
-      ),
-    ),
-  );
-}
 }
