@@ -7,6 +7,7 @@ import '../widgets/auth_header.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/primary_button.dart';
 import '../widgets/social_login_button.dart';
+import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,14 +19,18 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final emailController = TextEditingController();
+  final usernameController = TextEditingController();
   final passwordController = TextEditingController();
-
+  final AuthService _authService = AuthService();
+  
+  bool _isLoading = false;
+  bool obscurePassword = true;
   bool rememberMe = false;
+  //bool isLoading = false;
 
   @override
   void dispose() {
-    emailController.dispose();
+    usernameController.dispose();
     passwordController.dispose();
     super.dispose();
   }
@@ -33,11 +38,43 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> openUrl(String url) async {
     final Uri uri = Uri.parse(url);
 
-    if (!await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    )) {
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       throw "Could not launch $url";
+    }
+  }
+
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await _authService.login(
+        username: usernameController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Welcome ${response.firstName}')));
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -53,213 +90,216 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
 
-
-
         child: Center(
-                              child: SingleChildScrollView(
+          child: SingleChildScrollView(
+            child: Container(
+              margin: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
 
-          child: Container(
-            margin: const EdgeInsets.all(20),
-            padding: const EdgeInsets.all(20),
-
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.white,
-                width: 1,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white, width: 1),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFFF9EFE3), Color(0xFFEFEBFD)],
+                ),
               ),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFF9EFE3),
-                  Color(0xFFEFEBFD),
-                ],
-              ),
-            ),
 
-            child: Form(
-              key: _formKey,
+              child: Form(
+                key: _formKey,
 
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const AuthHeader(
+                      title: "Login",
+                      subtitle: "Enter your Username and password to log in",
+                      imagePath: AppAssets.logo,
+                    ),
 
-                  const AuthHeader(
-                    title: "Login",
-                    subtitle:
-                        "Enter your email and password to log in",
-                    imagePath: AppAssets.logo,
-                  ),
+                    const SizedBox(height: 30),
 
-                  const SizedBox(height: 30),
+                    AuthTextField(
+                      controller: usernameController,
+                      hint: "Username",
+                      //keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Username is required";
+                        }
+                      //   if (!value.contains("@")) {
+                      //   return "Enter a valid email";
+                      // }
+                        return null;
+                      },
+                    ),
 
-                  AuthTextField(
-                    controller: emailController,
-                    hint: "Email",
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Email is required";
-                      }
-                      if (!value.contains("@")) {
-                        return "Enter a valid email";
-                      }
-                      return null;
-                    },
-                  ),
+                    const SizedBox(height: 20),
 
-                  const SizedBox(height: 20),
+                    AuthTextField(
+                      controller: passwordController,
+                      hint: "Password",
+                      obscureText: obscurePassword,
+                      suffixIcon: obscurePassword
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      onSuffixTap: () {
+                        setState(() {
+                          obscurePassword = !obscurePassword;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Password is required";
+                        }
+                        if (value.length < 6) {
+                          return "Password must be at least 6 characters";
+                        }
+                        return null;
+                      },
+                    ),
 
-                  AuthTextField(
-                    controller: passwordController,
-                    hint: "Password",
-                    obscureText: true,
-                    suffixIcon: Icons.visibility_off_outlined,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Password is required";
-                      }
-                      if (value.length < 6) {
-                        return "Password must be at least 6 characters";
-                      }
-                      return null;
-                    },
-                  ),
+                    const SizedBox(height: 10),
 
-                  const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: rememberMe,
+                              activeColor: const Color(0xFF2563EB),
+                              onChanged: (value) {
+                                setState(() {
+                                  rememberMe = value ?? false;
+                                });
+                              },
+                            ),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                            const Text("Remember me"),
+                          ],
+                        ),
 
-                      Row(
-                        children: [
-
-                          Checkbox(
-                            value: rememberMe,
-                            activeColor: const Color(0xFF2563EB),
-                            onChanged: (value) {
-                              setState(() {
-                                rememberMe = value ?? false;
-                              });
-                            },
-                          ),
-
-                          const Text("Remember me"),
-                        ],
-                      ),
-
-                      GestureDetector(
-                        onTap: () {
-                          // Navigator.pushNamed(context, '/forgot-password');
-                        },
-                        child: const Text(
-                          "Forgot Password?",
-                          style: TextStyle(
-                            color: Color(0xFF2563EB),
-                            fontWeight: FontWeight.w600,
+                        GestureDetector(
+                          onTap: () {
+                            // Navigator.pushNamed(context, '/forgot-password');
+                          },
+                          child: const Text(
+                            "Forgot Password?",
+                            style: TextStyle(
+                              color: Color(0xFF2563EB),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-                  const SizedBox(height: 10),
+                    const SizedBox(height: 10),
 
-                  PrimaryButton(
-                    text: "Log In",
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Login Successful"),
+                    // PrimaryButton(
+                    //   text: isLoading ? "Loging in..." : "Log In",
+                    //   onPressed: isLoading
+                    //       ? null
+                    //       : () async {
+                    //           if (_formKey.currentState!.validate()) {
+                    //             setState(() {
+                    //               isLoading = true;
+                    //             });
+
+                    //             await Future.delayed(
+                    //               const Duration(seconds: 1),
+                    //             );
+
+                    //             setState(() {
+                    //               isLoading = false;
+                    //             });
+                    //             if (!mounted) return;
+
+                    //             ScaffoldMessenger.of(context).showSnackBar(
+                    //               const SnackBar(
+                    //                 content: Text("Login Successful"),
+                    //               ),
+                    //             );
+                    //           }
+                    //         },
+                    // ),
+                    PrimaryButton(
+                      text: _isLoading ? "Logging in..." : "Log In",
+                      onPressed: _isLoading ? null : _login,
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    Row(
+                      children: const [
+                        Expanded(child: Divider()),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Text("Or login with"),
+                        ),
+                        Expanded(child: Divider()),
+                      ],
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        SocialLoginButton(
+                          imagePath: AppAssets.google,
+                          onTap: () => openUrl("https://accounts.google.com/"),
+                        ),
+
+                        SocialLoginButton(
+                          imagePath: AppAssets.facebook,
+                          onTap: () => openUrl("https://www.facebook.com/"),
+                        ),
+
+                        SocialLoginButton(
+                          imagePath: AppAssets.apple,
+                          onTap: () => openUrl("https://www.apple.com/"),
+                        ),
+
+                        SocialLoginButton(
+                          imagePath: AppAssets.phone,
+                          onTap: () => openUrl("https://www.google.com/"),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Don't have an account? ",
+                          style: TextStyle(color: Colors.black),
+                        ),
+
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/signup');
+                          },
+                          child: const Text(
+                            "Sign Up",
+                            style: TextStyle(
+                              color: Color(0xFF2563EB),
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        );
-                      }
-                    },
-                  ),
-
-                  const SizedBox(height: 25),
-
-                  Row(
-                    children: const [
-                      Expanded(child: Divider()),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Text("Or login with"),
-                      ),
-                      Expanded(child: Divider()),
-                    ],
-                  ),
-
-                  const SizedBox(height: 25),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-
-                      SocialLoginButton(
-                        imagePath: AppAssets.google,
-                        onTap: () => openUrl(
-                          "https://accounts.google.com/",
                         ),
-                      ),
-
-                      SocialLoginButton(
-                        imagePath: AppAssets.facebook,
-                        onTap: () => openUrl(
-                          "https://www.facebook.com/",
-                        ),
-                      ),
-
-                      SocialLoginButton(
-                        imagePath: AppAssets.apple,
-                        onTap: () => openUrl(
-                          "https://www.apple.com/",
-                        ),
-                      ),
-
-                      SocialLoginButton(
-                        imagePath: AppAssets.phone,
-                        onTap: () => openUrl(
-                          "https://www.google.com/",
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-
-                      const Text(
-                        "Don't have an account? ",
-                        style: TextStyle(color: Colors.black),
-                      ),
-
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/signup');
-                        },
-                        child: const Text(
-                          "Sign Up",
-                          style: TextStyle(
-                            color: Color(0xFF2563EB),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
       ),
     );
   }

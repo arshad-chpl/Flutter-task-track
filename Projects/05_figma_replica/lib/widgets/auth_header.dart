@@ -17,10 +17,13 @@ class AuthHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SvgPicture.asset(
-         "assets/icons/Vector.svg",
-            height: 40,
-            width: 40,
+        Hero(
+          tag: 'testAnimation',
+          child: SvgPicture.asset(
+           "assets/icons/Vector.svg",
+              height: 40,
+              width: 40,
+          ),
         ),
 
         const SizedBox(height: 10),

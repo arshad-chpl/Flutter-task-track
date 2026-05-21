@@ -5,6 +5,7 @@ import '../constants/app_assets.dart';
 import '../constants/app_colors.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/primary_button.dart';
+import '../services/auth_service.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -14,26 +15,30 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController firstNameController =
+  final TextEditingController firstNameController = TextEditingController();
+
+  final TextEditingController lastNameController = TextEditingController();
+
+  final TextEditingController emailController = TextEditingController();
+
+  final TextEditingController dobController = TextEditingController();
+
+  final TextEditingController phoneController = TextEditingController();
+
+  final TextEditingController passwordController = TextEditingController();
+
+  final TextEditingController confirmPasswordController =
       TextEditingController();
 
-  final TextEditingController lastNameController =
-      TextEditingController();
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
 
-  final TextEditingController emailController =
-      TextEditingController();
-
-  final TextEditingController dobController =
-      TextEditingController();
-
-  final TextEditingController phoneController =
-      TextEditingController();
-
-  final TextEditingController passwordController =
-      TextEditingController();
+  bool obscurePassword = true;
+  bool obscureConfirmPassword = true;
+  bool acceptTerms = false;
+  // bool isLoading = false;
 
   @override
   void dispose() {
@@ -43,12 +48,60 @@ class _SignUpPageState extends State<SignUpPage> {
     dobController.dispose();
     phoneController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _signup() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+    if (!acceptTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please accept Terms & Conditions")),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await _authService.signup(
+        firstName: firstNameController.text.trim(),
+        lastName: lastNameController.text.trim(),
+        email: emailController.text.trim(),
+        phone: phoneController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User created: ${response.firstName}')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -66,15 +119,17 @@ class _SignUpPageState extends State<SignUpPage> {
 
             child: Column(
               children: [
-
                 const SizedBox(height: 10),
 
                 Center(
-                  child: SvgPicture.asset(
-                    AppAssets.companyLogo,
-                    height: 30,
-                    //width: 100,
-                    fit: BoxFit.contain,
+                  child: Hero(
+                    tag: 'testAnimation',
+                    child: SvgPicture.asset(
+                      AppAssets.companyLogo,
+                      height: 30,
+                      //width: 100,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
 
@@ -88,36 +143,29 @@ class _SignUpPageState extends State<SignUpPage> {
 
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius:
-                              BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(24),
                         ),
 
                         child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
 
                           children: [
-
                             IconButton(
                               onPressed: () {
                                 Navigator.pop(context);
                               },
 
-                              icon: const Icon(
-                                Icons.arrow_back,
-                              ),
+                              icon: const Icon(Icons.arrow_back),
                             ),
 
                             Center(
                               child: Column(
                                 children: [
-
                                   const Text(
                                     "Sign Up",
                                     style: TextStyle(
                                       fontSize: 30,
-                                      fontWeight:
-                                          FontWeight.bold,
+                                      fontWeight: FontWeight.bold,
                                       color: Color(0xFFB26DFF),
                                     ),
                                   ),
@@ -125,28 +173,21 @@ class _SignUpPageState extends State<SignUpPage> {
                                   const SizedBox(height: 8),
 
                                   Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
 
                                     children: [
-
-                                      const Text(
-                                        "Already have an account? ",
-                                      ),
+                                      const Text("Already have an account? "),
 
                                       GestureDetector(
                                         onTap: () {
-                                          Navigator.pop(
-                                            context,
-                                          );
+                                          Navigator.pop(context);
                                         },
 
                                         child: const Text(
                                           "Login",
                                           style: TextStyle(
                                             color: Colors.blue,
-                                            fontWeight:
-                                                FontWeight.w600,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                       ),
@@ -160,18 +201,14 @@ class _SignUpPageState extends State<SignUpPage> {
 
                             Row(
                               children: [
-
                                 Expanded(
                                   child: AuthTextField(
-                                    controller:
-                                        firstNameController,
+                                    controller: firstNameController,
                                     label: "First Name",
                                     hint: "Rahul",
 
                                     validator: (value) {
-
-                                      if (value == null ||
-                                          value.isEmpty) {
+                                      if (value == null || value.isEmpty) {
                                         return "Enter first name";
                                       }
 
@@ -184,15 +221,12 @@ class _SignUpPageState extends State<SignUpPage> {
 
                                 Expanded(
                                   child: AuthTextField(
-                                    controller:
-                                        lastNameController,
+                                    controller: lastNameController,
                                     label: "Last Name",
                                     hint: "Sharma",
 
                                     validator: (value) {
-
-                                      if (value == null ||
-                                          value.isEmpty) {
+                                      if (value == null || value.isEmpty) {
                                         return "Enter last name";
                                       }
 
@@ -208,16 +242,12 @@ class _SignUpPageState extends State<SignUpPage> {
                             AuthTextField(
                               controller: emailController,
                               label: "Email",
-                              hint:
-                                  "rahulsharma@gmail.com",
+                              hint: "rahulsharma@gmail.com",
 
-                              keyboardType:
-                                  TextInputType.emailAddress,
+                              keyboardType: TextInputType.emailAddress,
 
                               validator: (value) {
-
-                                if (value == null ||
-                                    value.isEmpty) {
+                                if (value == null || value.isEmpty) {
                                   return "Email is required";
                                 }
 
@@ -235,13 +265,12 @@ class _SignUpPageState extends State<SignUpPage> {
                               controller: dobController,
                               label: "Birth of date",
                               hint: "18/03/2016",
-                              suffixIcon:
-                                  Icons.calendar_today_outlined,
+                              suffixIcon: Icons.calendar_today_outlined,
+
+                              keyboardType: TextInputType.datetime,
 
                               validator: (value) {
-
-                                if (value == null ||
-                                    value.isEmpty) {
+                                if (value == null || value.isEmpty) {
                                   return "Enter date of birth";
                                 }
 
@@ -256,17 +285,14 @@ class _SignUpPageState extends State<SignUpPage> {
                               label: "Phone Number",
                               hint: "+91 9876543210",
 
-                              keyboardType:
-                                  TextInputType.phone,
+                              keyboardType: TextInputType.phone,
 
                               validator: (value) {
-
-                                if (value == null ||
-                                    value.isEmpty) {
+                                if (value == null || value.isEmpty) {
                                   return "Enter phone number";
                                 }
 
-                                if (value.length < 10) {
+                                if (value.length == 10) {
                                   return "Enter valid phone number";
                                 }
 
@@ -274,29 +300,23 @@ class _SignUpPageState extends State<SignUpPage> {
                               },
 
                               prefixIcon: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                   horizontal: 12,
                                 ),
 
                                 child: Row(
-                                  mainAxisSize:
-                                      MainAxisSize.min,
+                                  mainAxisSize: MainAxisSize.min,
 
                                   children: const [
-
                                     Text(
                                       "🇮🇳",
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                      ),
+                                      style: TextStyle(fontSize: 18),
                                     ),
 
                                     SizedBox(width: 4),
 
                                     Icon(
-                                      Icons
-                                          .keyboard_arrow_down,
+                                      Icons.keyboard_arrow_down,
                                       size: 18,
                                       color: Colors.black,
                                     ),
@@ -308,54 +328,123 @@ class _SignUpPageState extends State<SignUpPage> {
                             const SizedBox(height: 18),
 
                             AuthTextField(
-                              controller:
-                                  passwordController,
-
-                              label: "Set Password",
-
-                              hint: "*******",
-
-                              obscureText: true,
-
-                              suffixIcon:
-                                  Icons.visibility_off_outlined,
-
+                              controller: passwordController,
+                              label: "Enter Password",
+                              hint: "Password",
+                              obscureText: obscurePassword,
+                              suffixIcon: obscurePassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              onSuffixTap: () {
+                                setState(() {
+                                  obscurePassword = !obscurePassword;
+                                });
+                              },
                               validator: (value) {
-
-                                if (value == null ||
-                                    value.isEmpty) {
-                                  return "Enter password";
+                                if (value == null || value.isEmpty) {
+                                  return "Password is required";
                                 }
-
                                 if (value.length < 6) {
                                   return "Password must be at least 6 characters";
                                 }
-
                                 return null;
                               },
                             ),
 
+                            const SizedBox(height: 18),
+
+                            AuthTextField(
+                              controller: confirmPasswordController,
+                              label: "Confirm Password",
+                              hint: "Confirm Password",
+                              obscureText: obscureConfirmPassword,
+                              suffixIcon: obscureConfirmPassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              onSuffixTap: () {
+                                setState(() {
+                                  obscureConfirmPassword =
+                                      !obscureConfirmPassword;
+                                });
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Confirm your password";
+                                }
+                                if (value != passwordController.text) {
+                                  return "Passwords do not match";
+                                }
+                                return null;
+                              },
+                            ),
+
+                            Row(
+                              children: [
+                                Checkbox(
+                                  value: acceptTerms,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      acceptTerms = value ?? false;
+                                    });
+                                  },
+                                ),
+                                const Expanded(
+                                  child: Text(
+                                    'I agree to "Terms & Conditions"',
+                                  ),
+                                ),
+                              ],
+                            ),
+
                             const SizedBox(height: 30),
 
+                            // PrimaryButton(
+                            //   text: isLoading ? "Signing up..." : "Sign up",
+                            //   onPressed: isLoading
+                            //       ? null
+                            //       : () async {
+                            //           if (!_formKey.currentState!.validate()) {
+                            //             return;
+                            //           }
+
+                            //           if (!acceptTerms) {
+                            //             ScaffoldMessenger.of(context).showSnackBar(
+                            //               const SnackBar(
+                            //                 content: Text(
+                            //                   "Please accept Terms & Conditions",
+                            //                 ),
+                            //               ),
+                            //             );
+                            //             return;
+                            //           }
+
+                            //           setState(() {
+                            //             isLoading = true;
+
+                            //           });
+
+                            //           await Future.delayed(
+                            //             const Duration(seconds: 1),
+                            //           );
+
+                            //           setState(() {
+                            //             isLoading = false;
+                            //           });
+
+                            // ScaffoldMessenger.of(context).showSnackBar(
+                            //     const SnackBar(
+                            //         content: Text(
+                            //           "Sign up Successful",
+                            //         ),
+                            //       ),
+                            //     );
+                            //   },
+                            // ),
                             PrimaryButton(
-                              text: "Register",
-
-                              onPressed: () {
-
-                                if (_formKey.currentState!
-                                    .validate()) {
-
-                                  ScaffoldMessenger.of(
-                                    context,
-                                  ).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        "Registration Successful",
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
+                              text: _isLoading ? "Signing up..." : "Sign Up",
+                              //text: 'Sign up',
+                              isLoading: _isLoading,
+                              onPressed: _signup,
                             ),
                           ],
                         ),
