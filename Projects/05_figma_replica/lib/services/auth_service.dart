@@ -11,16 +11,10 @@ class AuthService {
     required String username,
     required String password,
   }) async {
-    final request = LoginRequest(
-      username: username,
-      password: password,
-    );
+    final request = LoginRequest(username: username, password: password);
 
-    final data = await _apiService.post(
-      '/auth/login',
-      request.toJson(),
-    );
-
+    final data = await _apiService.post('/auth/login', request.toJson());
+    print('reponse:. $data');
     return LoginResponse.fromJson(data);
   }
 
@@ -39,10 +33,7 @@ class AuthService {
       password: password,
     );
 
-    final data = await _apiService.post(
-      '/users/add',
-      request.toJson(),
-    );
+    final data = await _apiService.post('/users/add', request.toJson());
 
     return SignupResponse.fromJson(data);
   }

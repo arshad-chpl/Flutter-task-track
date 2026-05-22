@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/app_assets.dart';
 import '../constants/app_colors.dart';
@@ -80,11 +81,19 @@ class _SignUpPageState extends State<SignUpPage> {
         password: passwordController.text.trim(),
       );
 
+      final prefs = await SharedPreferences.getInstance();
+
+      await prefs.setString('username', firstNameController.text.trim());
+
+      await prefs.setBool('isLoggedIn', true);
+
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('User created: ${response.firstName}')),
       );
+
+      Navigator.pushReplacementNamed(context, '/home');
     } catch (error) {
       if (!mounted) return;
 
@@ -95,6 +104,7 @@ class _SignUpPageState extends State<SignUpPage> {
       if (mounted) {
         setState(() {
           _isLoading = false;
+          //Navigator.pushReplacementNamed(context, '/home');
         });
       }
     }
@@ -251,8 +261,12 @@ class _SignUpPageState extends State<SignUpPage> {
                                   return "Email is required";
                                 }
 
-                                if (!value.contains('@')) {
-                                  return "Enter valid email";
+                                final emailRegex = RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                );
+
+                                if (!emailRegex.hasMatch(value)) {
+                                  return "Enter a valid email address";
                                 }
 
                                 return null;
@@ -264,7 +278,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             AuthTextField(
                               controller: dobController,
                               label: "Birth of date",
-                              hint: "18/03/2016",
+                              hint: "DD/MM/YYYY",
                               suffixIcon: Icons.calendar_today_outlined,
 
                               keyboardType: TextInputType.datetime,
@@ -272,6 +286,29 @@ class _SignUpPageState extends State<SignUpPage> {
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return "Enter date of birth";
+                                }
+
+                                final parts = value.split('/');
+
+                                if (parts.length != 3) {
+                                  return "Use DD/MM/YYYY format";
+                                }
+
+                                final day = int.tryParse(parts[0]);
+                                final month = int.tryParse(parts[1]);
+                                final year = int.tryParse(parts[2]);
+
+                                if (day == null ||
+                                    month == null ||
+                                    year == null) {
+                                  return "Enter valid numbers";
+                                }
+
+                                if (day < 1 ||
+                                    day > 31 ||
+                                    month < 1 ||
+                                    month > 12) {
+                                  return "Enter valid date";
                                 }
 
                                 return null;
@@ -283,8 +320,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             AuthTextField(
                               controller: phoneController,
                               label: "Phone Number",
-                              hint: "+91 9876543210",
-
+                              hint: "10 digits number",
                               keyboardType: TextInputType.phone,
 
                               validator: (value) {
@@ -292,8 +328,8 @@ class _SignUpPageState extends State<SignUpPage> {
                                   return "Enter phone number";
                                 }
 
-                                if (value.length == 10) {
-                                  return "Enter valid phone number";
+                                if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+                                  return "Phone number must be exactly 10 digits";
                                 }
 
                                 return null;
