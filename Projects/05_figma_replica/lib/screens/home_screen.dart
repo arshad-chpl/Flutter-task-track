@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+
+import '../constants/app_assets.dart';
+import '../provider/user_provider.dart';
+
+import '../widgets/dashboard_card.dart';
+import '../widgets/profile_card.dart';
+import '../widgets/custom_bottom_navbar.dart';
+import '../widgets/responsive.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,246 +17,157 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int currentIndex = 0;
 
-  String username = '';
+  @override
+  void initState() {
+    super.initState();
 
-@override
-void initState() {
-  super.initState();
-  loadUserData();
-}
-
-Future<void> loadUserData() async {
-
-  final prefs =
-      await SharedPreferences.getInstance();
-
-  setState(() {
-
-    username =
-        prefs.getString('username') ?? '';
-
-  });
-}
-  Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    await prefs.clear();
-
-    if (!mounted) return;
-
-    Navigator.pushReplacementNamed(
-      context,
-      '/login',
-    );
+    Future.microtask(() {
+      context.read<UserProvider>().loadUserData();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    Responsive.init(context);
 
+    final userProvider = context.watch<UserProvider>();
+
+    return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
-        elevation: 0,
+        backgroundColor: Color.fromARGB(255, 30, 101, 100),
+
         title: const Text(
-          'Home',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          'Student Dashboard',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
 
         actions: [
           IconButton(
-            onPressed: logout,
-            icon: const Icon(
-              Icons.logout,
-              color: Colors.white,
-            ),
+            onPressed: () {
+              userProvider.logout(context);
+            },
+            icon: const Icon(Icons.logout, color: Colors.white),
           ),
         ],
       ),
 
       body: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(20),
+        height: double.infinity,
+
+        padding: Responsive.paddingAll(12),
 
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFE0EAFC),
-              Color(0xFFCFDEF3),
-            ],
+
+            colors: [Color(0xFFE8F0FF), Color(0xFFD6E4FF)],
           ),
         ),
 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: RefreshIndicator(
+          onRefresh: userProvider.loadUserData,
 
-            const SizedBox(height: 20),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
 
-            // Welcome Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
 
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+              children: [
+                const SizedBox(height: 20),
 
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 10,
-                    spreadRadius: 2,
+                ProfileCard(
+                  username: userProvider.username,
+                  email: userProvider.email,
+                ),
+
+                const SizedBox(height: 30),
+
+                Text(
+                  'Student Services',
+                  style: TextStyle(
+                    fontSize: Responsive.px(20),
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              ),
+                ),
 
-              child: Row(
-                children: [
+                const SizedBox(height: 20),
 
-                  const CircleAvatar(
-                    radius: 35,
-                    backgroundColor: Colors.blue,
+                GridView.count(
+                  crossAxisCount: Responsive.isTablet() ? 4 : 2,
 
-                    child: Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: 35,
+                  crossAxisSpacing: 15,
+                  mainAxisSpacing: 15,
+
+                  shrinkWrap: true,
+
+                  physics: const NeverScrollableScrollPhysics(),
+
+                  children: [
+                    DashboardCard(
+                      title: 'Profile',
+                      imagePath: AppAssets.profile,
+                      color: Colors.green,
+                      onTap: () {
+                        Navigator.pushNamed(context, '/profile');
+                      },
                     ),
-                  ),
 
-                  const SizedBox(width: 20),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                      children: [
-
-                        const Text(
-                          'Welcome Back',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
-                        ),
-
-                        const SizedBox(height: 5),
-
-                        Text(
-                          username,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    DashboardCard(
+                      title: 'Attendance',
+                      imagePath: AppAssets.attendance,
+                      color: Colors.green,
+                      onTap: () {
+                        Navigator.pushNamed(context, '/attendance');
+                      },
                     ),
-                  ),
-                ],
-              ),
+
+                    DashboardCard(
+                      title: 'Assignments',
+                      imagePath: AppAssets.assignment,
+                      color: Colors.green,
+                      onTap: () {
+                        Navigator.pushNamed(context, '/assignments');
+                      },
+                    ),
+
+                    DashboardCard(
+                      title: 'Timetable',
+                      imagePath: AppAssets.timetable,
+                      color: Colors.green,
+                      onTap: () {
+                        Navigator.pushNamed(context, '/timetable');
+                      },
+                    ),
+
+                    DashboardCard(
+                      title: 'Result',
+                      imagePath: AppAssets.result,
+                      color: Colors.green,
+                      onTap: () {
+                        Navigator.pushNamed(context, '/result');
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
-
-            const SizedBox(height: 30),
-
-            const Text(
-              'Dashboard',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-
-                children: [
-
-                  dashboardCard(
-                    title: 'Profile',
-                    icon: Icons.person,
-                    color: Colors.orange,
-                  ),
-
-                  dashboardCard(
-                    title: 'Settings',
-                    icon: Icons.settings,
-                    color: Colors.blue,
-                  ),
-
-                  dashboardCard(
-                    title: 'Notifications',
-                    icon: Icons.notifications,
-                    color: Colors.green,
-                  ),
-
-                  dashboardCard(
-                    title: 'Analytics',
-                    icon: Icons.bar_chart,
-                    color: Colors.purple,
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
-    );
-  }
 
-  Widget dashboardCard({
-    required String title,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+      bottomNavigationBar: CustomBottomNavbar(
+        currentIndex: currentIndex,
 
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 8,
-          ),
-        ],
-      ),
-
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: color.withOpacity(0.15),
-
-            child: Icon(
-              icon,
-              color: color,
-              size: 32,
-            ),
-          ),
-
-          const SizedBox(height: 15),
-
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+        onTap: (index) {
+          setState(() {
+            currentIndex = index;
+          });
+        },
       ),
     );
   }

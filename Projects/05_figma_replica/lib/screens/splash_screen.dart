@@ -69,7 +69,7 @@ class _SplashScreenState
                 boxShadow: [
                   BoxShadow(
                     color:
-                        Colors.black.withOpacity(0.1),
+                        Colors.black.withValues(alpha: 0.1),
                     blurRadius: 12,
                     spreadRadius: 2,
                   ),
@@ -77,8 +77,9 @@ class _SplashScreenState
               ),
 
               child: ClipOval(
-                child: Image.network(
-                  'https://dummyjson.com/icon/emilys/128',
+                child: Image.asset(
+                            'assets/icons/logo_image.png',
+
                   fit: BoxFit.cover,
                 ),
               ),

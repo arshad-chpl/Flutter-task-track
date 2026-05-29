@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../services/local_storage_service.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/app_assets.dart';
 import '../constants/app_colors.dart';
@@ -34,6 +35,7 @@ class _SignUpPageState extends State<SignUpPage> {
       TextEditingController();
 
   final AuthService _authService = AuthService();
+  final LocalStorageService _storageService = LocalStorageService();
   bool _isLoading = false;
 
   bool obscurePassword = true;
@@ -81,11 +83,16 @@ class _SignUpPageState extends State<SignUpPage> {
         password: passwordController.text.trim(),
       );
 
-      final prefs = await SharedPreferences.getInstance();
+      // final prefs = await SharedPreferences.getInstance();
 
-      await prefs.setString('username', firstNameController.text.trim());
+      // await prefs.setString('username', firstNameController.text.trim());
 
-      await prefs.setBool('isLoggedIn', true);
+      // await prefs.setBool('isLoggedIn', true);
+
+      await _storageService.saveFirstName(firstNameController.text.trim());
+      await _storageService.saveEmail(emailController.text.trim());
+
+      await _storageService.saveLoginStatus(true);
 
       if (!mounted) return;
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../services/local_storage_service.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/app_assets.dart';
 import '../constants/app_colors.dart';
@@ -23,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   final AuthService _authService = AuthService();
+  final LocalStorageService _storageService = LocalStorageService();
 
   bool _isLoading = false;
   bool obscurePassword = true;
@@ -36,28 +38,31 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadSavedData();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _loadSavedData();
+  // }
 
-  Future<void> _loadSavedData() async {
-    final prefs = await SharedPreferences.getInstance();
+  // Future<void> _loadSavedData() async {
+  //   final prefs = await SharedPreferences.getInstance();
 
-    bool savedRememberMe = prefs.getBool('rememberMe') ?? false;
+  //   bool savedRememberMe = prefs.getBool('rememberMe') ?? false;
 
-    if (savedRememberMe) {
-      setState(() {
-        rememberMe = true;
-        usernameController.text = prefs.getString('username') ?? '';
-        passwordController.text = prefs.getString('password') ?? '';
-      });
-    }
-  }
+  //   if (savedRememberMe) {
+  //     setState(() {
+  //       rememberMe = true;
+  //       usernameController.text = prefs.getString('username') ?? '';
+  //       passwordController.text = prefs.getString('password') ?? '';
+  //     });
+  //   }
+  // }
 
   Future<void> openUrl(String url) async {
     final Uri uri = Uri.parse(url);
+
+    if (!mounted) return;
+
 
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       throw "Could not launch $url";
@@ -73,38 +78,36 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
+    if (!mounted) return;
+
+
     try {
       final response = await _authService.login(
         username: usernameController.text.trim(),
         password: passwordController.text.trim(),
       );
 
-      final prefs = await SharedPreferences.getInstance();
-
-      if (rememberMe) {
-        await prefs.setBool('rememberMe', true);
-
-        await prefs.setString('username', response.username??'');
-
-        await prefs.setString('password', passwordController.text.trim());
-      }
-      if (response.accessToken?.isNotEmpty??false) {
-        await prefs.setBool('isLoggedIn', true);
-      }
-
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Welcome ${response.firstName}')));
+      if (response.accessToken != null && response.accessToken!.isNotEmpty) {
+        await _storageService.saveLoginStatus(true);
 
-      Navigator.pushReplacementNamed(context, '/home');
-    } catch (error) {
-      if (!mounted) return;
+        await _storageService.saveAccessToken(response.accessToken!);
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Invalid username or password')));
+        await _storageService.saveFirstName(response.firstName ?? '');
+        if (!mounted) return;
+
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Welcome ${response.firstName}')),
+        );
+
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid username or password')),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -114,14 +117,53 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Future<void> checkLogin() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  // Future<void> _login() async {
+  //   if (!_formKey.currentState!.validate()) {
+  //     return;
+  //   }
 
-  //   if (isLoggedIn) {
-  //     Navigator.pushNamed(context, '/home');
-  //   } else {
-  //     Navigator.pushNamed(context, '/login');
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
+
+  //   try {
+  //     final response = await _authService.login(
+  //       username: usernameController.text.trim(),
+  //       password: passwordController.text.trim(),
+  //     );
+
+  //     // final prefs = await SharedPreferences.getInstance();
+
+  //     // if (rememberMe) {
+  //     //   await prefs.setBool('rememberMe', true);
+
+  //     //   await prefs.setString('username', response.username??'');
+
+  //     //   await prefs.setString('password', passwordController.text.trim());
+  //     // }
+  //     // if (response.accessToken?.isNotEmpty??false) {
+  //     //   await prefs.setBool('isLoggedIn', true);
+  //     // }
+
+  //     if (!mounted) return;
+
+  //     if (response.accessToken != null && response.accessToken!.isNotEmpty) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Welcome ${response.firstName}')),
+  //       );
+
+  //       Navigator.pushReplacementNamed(context, '/home');
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('Invalid username or password')),
+  //       );
+  //     }
+  //   } finally {
+  //     if (mounted) {
+  //       setState(() {
+  //         _isLoading = false;
+  //       });
+  //     }
   //   }
   // }
 
@@ -162,7 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const AuthHeader(
                       title: "Login",
                       subtitle: "Enter your Username and password to log in",
-                      imagePath: AppAssets.logo,
+                      imagePath: 'assets/icons/logo1.png',
                     ),
 
                     const SizedBox(height: 30),
