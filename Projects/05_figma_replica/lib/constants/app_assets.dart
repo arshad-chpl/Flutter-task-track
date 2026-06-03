@@ -14,6 +14,7 @@ class AppAssets {
   static const assignment = "assets/icons/assignment.png";
   static const timetable = "assets/icons/timetable.png";
   static const result = "assets/icons/result.png";
+  static const notes = "assets/icons/notes.png";
   //static const fees = "assets/icons/fees.png";
   //static const notification = "assets/icons/notifications.png";
   //static const settings = "assets/icons/settings.png";

@@ -143,6 +143,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
 
                     DashboardCard(
+                      title: 'Notes',
+                      imagePath: AppAssets.notes,
+                      color: theme.colorScheme.primary,
+                      onTap: () {
+                        Navigator.pushNamed(context, '/notes_list');
+                      },
+                    ),
+
+                    DashboardCard(
                       title: 'Results',
                       imagePath: AppAssets.result,
                       color: theme.colorScheme.primary,
@@ -169,4 +178,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-//rewrite this also properly
