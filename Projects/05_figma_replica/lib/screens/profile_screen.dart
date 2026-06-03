@@ -21,8 +21,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    //final colorScheme = Theme.of(context).colorScheme;
+    //final isDark = Theme.of(context).brightness == Brightness.dark;
     final provider = context.watch<UserProvider>();
 
     return Scaffold(
