@@ -4,9 +4,9 @@ import 'package:provider/provider.dart';
 import '../constants/app_assets.dart';
 import '../provider/user_provider.dart';
 
+import '../widgets/custom_bottom_navbar.dart';
 import '../widgets/dashboard_card.dart';
 import '../widgets/profile_card.dart';
-import '../widgets/custom_bottom_navbar.dart';
 import '../widgets/responsive.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
 
     Future.microtask(() {
-      context.read<UserProvider>().loadUserData();
+      context.read<UserProvider>().loadProfile();
     });
   }
 
@@ -33,22 +33,21 @@ class _HomeScreenState extends State<HomeScreen> {
     Responsive.init(context);
 
     final userProvider = context.watch<UserProvider>();
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 30, 101, 100),
-
         title: const Text(
           'Student Dashboard',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-
         actions: [
           IconButton(
             onPressed: () {
               userProvider.logout(context);
             },
-            icon: const Icon(Icons.logout, color: Colors.white),
+            icon: const Icon(Icons.logout),
           ),
         ],
       ),
@@ -56,15 +55,15 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-
         padding: Responsive.paddingAll(12),
 
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-
-            colors: [Color(0xFFE8F0FF), Color(0xFFD6E4FF)],
+            colors: isDark
+                ? const [Color(0xFF1A1A1A), Color(0xFF2A2A2A)]
+                : const [Color(0xFFE8F0FF), Color(0xFFD6E4FF)],
           ),
         ),
 
@@ -81,15 +80,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 20),
 
                 ProfileCard(
-                  username: userProvider.username,
-                  email: userProvider.email,
+                  username: userProvider.user == null
+                      ? ''
+                      : '${userProvider.user!.firstName} ${userProvider.user!.lastName}',
+                  email: userProvider.user?.email ?? '',
                 ),
 
                 const SizedBox(height: 30),
 
                 Text(
                   'Student Services',
-                  style: TextStyle(
+                  style: theme.textTheme.titleLarge?.copyWith(
                     fontSize: Responsive.px(20),
                     fontWeight: FontWeight.bold,
                   ),
@@ -99,19 +100,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 GridView.count(
                   crossAxisCount: Responsive.isTablet() ? 4 : 2,
-
                   crossAxisSpacing: 15,
                   mainAxisSpacing: 15,
-
                   shrinkWrap: true,
-
                   physics: const NeverScrollableScrollPhysics(),
 
                   children: [
                     DashboardCard(
                       title: 'Profile',
                       imagePath: AppAssets.profile,
-                      color: Colors.green,
+                      color: theme.colorScheme.primary,
                       onTap: () {
                         Navigator.pushNamed(context, '/profile');
                       },
@@ -120,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     DashboardCard(
                       title: 'Attendance',
                       imagePath: AppAssets.attendance,
-                      color: Colors.green,
+                      color: theme.colorScheme.primary,
                       onTap: () {
                         Navigator.pushNamed(context, '/attendance');
                       },
@@ -129,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     DashboardCard(
                       title: 'Assignments',
                       imagePath: AppAssets.assignment,
-                      color: Colors.green,
+                      color: theme.colorScheme.primary,
                       onTap: () {
                         Navigator.pushNamed(context, '/assignments');
                       },
@@ -138,16 +136,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     DashboardCard(
                       title: 'Timetable',
                       imagePath: AppAssets.timetable,
-                      color: Colors.green,
+                      color: theme.colorScheme.primary,
                       onTap: () {
                         Navigator.pushNamed(context, '/timetable');
                       },
                     ),
 
                     DashboardCard(
-                      title: 'Result',
+                      title: 'Results',
                       imagePath: AppAssets.result,
-                      color: Colors.green,
+                      color: theme.colorScheme.primary,
                       onTap: () {
                         Navigator.pushNamed(context, '/result');
                       },
@@ -162,7 +160,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
       bottomNavigationBar: CustomBottomNavbar(
         currentIndex: currentIndex,
-
         onTap: (index) {
           setState(() {
             currentIndex = index;
@@ -172,3 +169,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+//rewrite this also properly

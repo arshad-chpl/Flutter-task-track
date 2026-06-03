@@ -13,15 +13,16 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       width: double.infinity,
-
-      padding: Responsive.paddingAll(5),
+      padding: Responsive.paddingAll(8),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(20),
-
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),
@@ -40,9 +41,12 @@ class ProfileCard extends StatelessWidget {
             child: ClipOval(
               child: Image.asset(
                 'assets/icons/logo_image.png',
+                fit: BoxFit.cover,
               ),
             ),
           ),
+
+          const SizedBox(width: 12),
 
           Expanded(
             child: Column(
@@ -53,7 +57,7 @@ class ProfileCard extends StatelessWidget {
                   'Welcome Back',
                   style: TextStyle(
                     fontSize: Responsive.px(15),
-                    color: Colors.black,
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
 
@@ -64,6 +68,7 @@ class ProfileCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: Responsive.px(20),
                     fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
                   ),
                 ),
 
@@ -71,9 +76,10 @@ class ProfileCard extends StatelessWidget {
 
                 Text(
                   email,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: Responsive.px(13),
-                    color: Colors.grey,
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],

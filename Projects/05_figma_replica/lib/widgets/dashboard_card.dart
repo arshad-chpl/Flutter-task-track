@@ -17,19 +17,27 @@ class DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
 
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
+
           borderRadius: BorderRadius.circular(20),
+
+          border: Border.all(
+            color: theme.dividerColor.withValues(alpha: 0.3),
+          ),
 
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -40,11 +48,11 @@ class DashboardCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 40,
+
               backgroundColor: color.withValues(alpha: 0.15),
 
               child: Padding(
                 padding: const EdgeInsets.all(12),
-
                 child: Image.asset(
                   imagePath,
                   fit: BoxFit.contain,
@@ -56,7 +64,9 @@ class DashboardCard extends StatelessWidget {
 
             Text(
               title,
-              style: TextStyle(
+              textAlign: TextAlign.center,
+
+              style: theme.textTheme.titleMedium?.copyWith(
                 fontSize: Responsive.px(14),
                 fontWeight: FontWeight.w600,
               ),

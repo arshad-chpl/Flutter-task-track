@@ -39,12 +39,14 @@ class UserProvider extends ChangeNotifier {
 
       if (editedProfile != null) {
         username = editedProfile.firstName;
-
         email = editedProfile.email;
+        // print("$username");
+        // print("$email");
       } else {
         username = await _storageService.getFirstName() ?? '';
-
         email = await _storageService.getEmail() ?? '';
+        // print("$username");
+        // print("$email");
       }
     } catch (e) {
       errorMessage = 'Failed to load user data';

@@ -21,16 +21,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final provider = context.watch<UserProvider>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-
+      // backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-
-        backgroundColor: const Color.fromARGB(255, 30, 101, 100),
 
         title: const Text(
           'Profile',
@@ -77,7 +76,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       padding: const EdgeInsets.all(22),
 
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
 
                         borderRadius: BorderRadius.circular(24),
 
@@ -96,14 +95,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Container(
                             // decoration: BoxDecoration(
                             //   shape: BoxShape.circle,
-
                             //   border: Border.all(color: Colors.white, width: 3),
                             // ),
-
                             child: CircleAvatar(
                               radius: 55,
-                              //backgroundColor: Colors.white,
 
+                              //backgroundColor: Colors.white,
                               backgroundImage: NetworkImage(
                                 provider.user!.image,
                               ),
@@ -117,8 +114,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                             textAlign: TextAlign.center,
 
-                            style: const TextStyle(
-                              color: Colors.black,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
@@ -130,8 +127,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             provider.emailController.text,
 
                             style: TextStyle(
-                              color: Colors.black.withValues(alpha: 0.9),
-
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.7),
                               fontSize: 15,
                             ),
                           ),
@@ -331,7 +329,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.all(18),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
 
         borderRadius: BorderRadius.circular(18),
 
@@ -363,7 +361,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
 
-            child: Icon(icon, color: const Color.fromARGB(255, 30, 101, 100)),
+            child: Icon(icon, color: Theme.of(context).colorScheme.primary),
           ),
 
           const SizedBox(width: 14),
@@ -377,9 +375,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   title,
 
                   style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
 
@@ -393,8 +391,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           isDense: true,
 
                           filled: true,
-                          fillColor: Colors.black,
-
+                          fillColor:
+                              Theme.of(context).brightness == Brightness.dark
+                              ? Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest
+                              : Colors.grey.shade100,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 14,
                             vertical: 12,
@@ -418,9 +420,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     : Text(
                         controller.text,
 
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                          //fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
               ],
