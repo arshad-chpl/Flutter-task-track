@@ -7,6 +7,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'provider/user_provider.dart';
 import 'provider/theme_provider.dart';
 import 'provider/notes_provider.dart';
+import 'provider/auth_provider.dart';
 
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
@@ -23,13 +24,21 @@ import 'screens/note_editor_screen.dart';
 
 import 'constants/app_theme.dart';
 
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp();
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => NotesProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+
       ],
       child: const MyApp(),
     ),
@@ -85,3 +94,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+

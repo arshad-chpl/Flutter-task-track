@@ -128,6 +128,37 @@ class NoteCard extends StatelessWidget {
                     ),
                   ),
 
+                  if (note.tags.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: note.tags.map((tag) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.12,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '#$tag',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+
                   const SizedBox(height: 12),
 
                   Row(

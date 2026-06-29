@@ -56,7 +56,7 @@ class UserProvider extends ChangeNotifier {
 
     notifyListeners();
   }
-
+   
   Future<void> loadProfile() async {
     try {
       isLoading = true;

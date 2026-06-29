@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../services/local_storage_service.dart';
+
+import 'package:provider/provider.dart';
+import 'package:birth_picker/birth_picker.dart';
+import '../provider/auth_provider.dart';
 //import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/app_assets.dart';
 import '../constants/app_colors.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/primary_button.dart';
-import '../services/auth_service.dart';
+//import '../services/auth_service.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -34,7 +38,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
-  final AuthService _authService = AuthService();
+  //final AuthService _authService = AuthService();
   final LocalStorageService _storageService = LocalStorageService();
   bool _isLoading = false;
 
@@ -55,18 +59,63 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
+  // Future<void> _signup() async {
+  //   if (!_formKey.currentState!.validate()) {
+  //     return;
+  //   }
+
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
+  //   if (!acceptTerms) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text("Please accept Terms & Conditions")),
+  //     );
+  //     return;
+  //   }
+
+  //   setState(() {
+  //     _isLoading = true;
+  //   });
+
+  //   // try {
+  //   //   final response = await _authService.signup(
+  //   //     firstName: firstNameController.text.trim(),
+  //   //     lastName: lastNameController.text.trim(),
+  //   //     email: emailController.text.trim(),
+  //   //     phone: phoneController.text.trim(),
+  //   //     password: passwordController.text.trim(),
+  //   //   );
+
+  //     // final prefs = await SharedPreferences.getInstance();
+
+  //     // await prefs.setString('username', firstNameController.text.trim());
+
+  //     // await prefs.setBool('isLoggedIn', true);
+
+  //     await _storageService.saveFirstName(firstNameController.text.trim());
+  //     await _storageService.saveEmail(emailController.text.trim());
+
+  //     await _storageService.saveLoginStatus(true);
+
+  //     if (!mounted) return;
+
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('User created: ${response.firstName}')),
+  //     );
+
+  //     Navigator.pushReplacementNamed(context, '/home');
+  //   }
   Future<void> _signup() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
     if (!acceptTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please accept Terms & Conditions")),
       );
+
       return;
     }
 
@@ -75,32 +124,41 @@ class _SignUpPageState extends State<SignUpPage> {
     });
 
     try {
-      final response = await _authService.signup(
+      final authProvider = context.read<AuthProvider>();
+
+      final success = await authProvider.signup(
         firstName: firstNameController.text.trim(),
+
         lastName: lastNameController.text.trim(),
+
         email: emailController.text.trim(),
+
         phone: phoneController.text.trim(),
+
         password: passwordController.text.trim(),
+
+        dob: dobController.text.trim(),
       );
-
-      // final prefs = await SharedPreferences.getInstance();
-
-      // await prefs.setString('username', firstNameController.text.trim());
-
-      // await prefs.setBool('isLoggedIn', true);
-
-      await _storageService.saveFirstName(firstNameController.text.trim());
-      await _storageService.saveEmail(emailController.text.trim());
-
-      await _storageService.saveLoginStatus(true);
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User created: ${response.firstName}')),
-      );
+      if (success) {
+        await _storageService.saveFirstName(firstNameController.text.trim());
 
-      Navigator.pushReplacementNamed(context, '/home');
+        await _storageService.saveEmail(emailController.text.trim());
+
+        await _storageService.saveLoginStatus(true);
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Signup Successful")));
+
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Signup failed")));
+      }
     } catch (error) {
       if (!mounted) return;
 
@@ -111,7 +169,6 @@ class _SignUpPageState extends State<SignUpPage> {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          //Navigator.pushReplacementNamed(context, '/home');
         });
       }
     }
@@ -288,7 +345,27 @@ class _SignUpPageState extends State<SignUpPage> {
                               hint: "DD/MM/YYYY",
                               suffixIcon: Icons.calendar_today_outlined,
 
-                              keyboardType: TextInputType.datetime,
+                              readOnly: true,
+
+                              onTap: () async {
+                                DateTime? pickedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now().subtract(
+                                    const Duration(
+                                      days: 365 * 18,
+                                    ), // default 18 years old
+                                  ),
+                                  firstDate: DateTime(1900),
+                                  lastDate: DateTime.now(),
+                                );
+
+                                if (pickedDate != null) {
+                                  dobController.text =
+                                      "${pickedDate.day.toString().padLeft(2, '0')}/"
+                                      "${pickedDate.month.toString().padLeft(2, '0')}/"
+                                      "${pickedDate.year}";
+                                }
+                              },
 
                               validator: (value) {
                                 if (value == null || value.isEmpty) {

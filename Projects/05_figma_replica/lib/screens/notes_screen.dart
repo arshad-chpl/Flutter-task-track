@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/note_sort.dart';
 import '../provider/notes_provider.dart';
 import '../widgets/note_card.dart';
 import 'note_editor_screen.dart';
@@ -20,6 +21,27 @@ class NotesScreen extends StatelessWidget {
         ),
 
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          PopupMenuButton<NoteSort>(
+            icon: const Icon(Icons.sort),
+
+            onSelected: (value) {
+              provider.changeSort(value);
+            },
+
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: NoteSort.updatedAt,
+                child: Text('Last Updated'),
+              ),
+              PopupMenuItem(
+                value: NoteSort.createdAt,
+                child: Text('Created Date'),
+              ),
+              PopupMenuItem(value: NoteSort.title, child: Text('Title A-Z')),
+            ],
+          ),
+        ],
       ),
 
       floatingActionButton: FloatingActionButton(
@@ -80,6 +102,43 @@ class NotesScreen extends StatelessWidget {
               ),
             ),
 
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                height: 50,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: const Text('All'),
+                        selected: provider.selectedTag == null,
+                        onSelected: (_) {
+                          provider.filterByTag(null);
+                        },
+                      ),
+                    ),
+
+                    ...provider.allTags.map(
+                      (tag) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          label: Text('#$tag'),
+
+                          selected: provider.selectedTag == tag,
+
+                          onSelected: (_) {
+                            provider.filterByTag(tag);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
             Expanded(
               child: provider.isLoading
                   ? const Center(child: CircularProgressIndicator())
@@ -119,3 +178,5 @@ class NotesScreen extends StatelessWidget {
     );
   }
 }
+
+
